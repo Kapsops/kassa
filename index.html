@@ -47,13 +47,27 @@ h3,th,.kpi .hint,.balance-total span,.carry span,.mon ul,#avgMonths,#budgetSumma
 #avgTable td{padding-top:3px;padding-bottom:3px;height:32px}#avgTable th{padding-top:6px;padding-bottom:6px}#avgTable input{min-height:30px;height:30px;padding-top:2px;padding-bottom:2px;font-family:var(--font-mono);font-size:12px}#avgTable td:first-child{font-size:13px}#p-plan>.card:has(#avgTable){gap:10px}#p-plan>.card:has(#avgTable) .hint{font-size:12px}
 #sAmt{font-family:var(--font-mono)}.sub-comment{display:block;color:var(--muted);font-size:12px;margin-top:2px}.mon li[title]{cursor:help}
 @media(max-width:560px){#avgTable input{height:44px;min-height:44px}}
+
+/* Сборка A2: мягкий графит, светящиеся состояния, компактные отчёты */
+:root{--bg-raw:#1D2223;--panel-raw:#292F30;--panel-raised:#333A3B;--ink-raw:#E5E9E6;--coral-raw:#FF8266;--muted:oklch(from var(--ink-raw) .67 l c h);--line:oklch(from var(--ink-raw) .12 l c h)}
+body{background:radial-gradient(900px 520px at 78% -10%,rgba(255,130,102,.055),transparent 65%),var(--bg);font-family:var(--font-body)}
+h1,h2,.kpi b,.mon .msum,.settle .verdict,.balance-total b,.donut b{font-family:var(--font-body);font-weight:500;letter-spacing:-.025em}h1{font-size:30px}h2{font-size:18px}.kpi b{font-size:25px}
+.card{background:linear-gradient(145deg,rgba(255,255,255,.025),transparent 42%),var(--surface);border-color:rgba(255,255,255,.075);box-shadow:0 14px 34px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.035);transition:border-color .24s,box-shadow .24s,transform .24s}
+.kpi{background:linear-gradient(145deg,rgba(255,255,255,.025),transparent),var(--surface);border-color:rgba(255,255,255,.07);box-shadow:0 10px 25px rgba(0,0,0,.17),inset 0 1px 0 rgba(255,255,255,.035)}
+nav{gap:6px;padding:5px;background:rgba(0,0,0,.16);border:1px solid var(--line);border-radius:12px}nav button{border:1px solid transparent;border-radius:8px;background:transparent;min-height:40px}nav button[aria-selected="true"]{border-color:rgba(255,130,102,.62);background:rgba(255,130,102,.10);color:var(--ink);box-shadow:0 0 16px rgba(255,130,102,.12),inset 0 0 10px rgba(255,130,102,.05)}nav button:hover{border-color:rgba(255,130,102,.3)}
+button.btn{border-radius:9px;box-shadow:0 0 18px rgba(255,130,102,.12)}button.ghost{box-shadow:none}.plus-btn{transition:color .2s,border-color .2s,background .2s}.plus-btn:hover{background:rgba(255,130,102,.07)}
+.mon{position:relative;overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.015) 50%,rgba(255,130,102,.025));border-color:rgba(255,255,255,.13);box-shadow:0 12px 28px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.06);transition:transform .24s,border-color .24s,box-shadow .24s,background .24s}.mon::before{content:"";position:absolute;inset:-45% 35% 45% -25%;background:radial-gradient(circle,rgba(255,130,102,.16),transparent 68%);opacity:.22;transition:opacity .24s;pointer-events:none}.mon>*{position:relative}.mon:hover{transform:translateY(-2px);border-color:rgba(255,130,102,.45);box-shadow:0 15px 32px rgba(0,0,0,.25),0 0 20px rgba(255,130,102,.08)}.mon:hover::before,.mon.now::before{opacity:1}.mon.now{border-color:rgba(255,130,102,.78);box-shadow:0 0 24px rgba(255,130,102,.14),inset 0 1px 0 rgba(255,255,255,.12)}.mon .heat{background:rgba(255,255,255,.08)}.mon .heat i{box-shadow:0 0 8px rgba(255,130,102,.5)}
+#daily svg{overflow:visible}#daily svg path[stroke="var(--accent)"]{filter:drop-shadow(0 0 5px rgba(255,130,102,.65))}#daily svg circle{filter:drop-shadow(0 0 4px rgba(255,255,255,.45))}.bar .fill{box-shadow:0 0 7px currentColor}.donut-a{filter:drop-shadow(0 0 3px rgba(255,130,102,.4))}
+#listTopup,#listExpense,#listOther,#planTable,#subTable{font-family:var(--font-mono)}#listTopup td,#listExpense td,#listOther td{font-size:12px;line-height:1.4;border-bottom:1px dashed rgba(255,255,255,.09)}#listTopup input,#listTopup select,#listExpense input,#listExpense select,#listOther input,#listOther select{font-family:var(--font-mono);font-size:12px;letter-spacing:.015em}#topupSummary,#expenseSummary{border-top:1px solid var(--line);padding-top:12px;line-height:1.75}#listSearch{font-family:var(--font-mono);font-size:13px}
+.hint{color:var(--muted)}h3,th{font-weight:400;letter-spacing:.11em}.status,.kpi .hint,.balance-total span,.carry span,.mon ul,#budgetSummary{line-height:1.65;letter-spacing:.06em}
+@media(max-width:560px){h1{font-size:25px}.kpi b{font-size:21px}nav{gap:3px}.mon:hover{transform:none}.card{box-shadow:0 10px 24px rgba(0,0,0,.18)}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
-  <h1>Семейная касса<small id="hdrsub">Общие траты Кати П. и Кати О.</small></h1>
+  <h1>Семейная касса<small id="hdrsub">Общие траты P и O</small></h1>
   <div class="row" style="gap:8px"><button class="btn small" id="fsResume" hidden>Включить автосохранение</button><span class="pill" id="fsPill" hidden></span><span class="pill in" id="syncPill" hidden></span></div>
   <nav role="tablist" id="tabs">
     <button data-tab="month" aria-selected="true">Месяц</button>
@@ -117,7 +131,7 @@ h3,th,.kpi .hint,.balance-total span,.carry span,.mon ul,#avgMonths,#budgetSumma
   </div>
   <div class="card">
     <div class="row" style="justify-content:space-between">
-      <h2 style="color:var(--ok)">Пополнения (взносы Кати О. и Кати П.)</h2>
+      <h2 style="color:var(--ok)">Пополнения (взносы O и P)</h2>
       <button type="button" class="plus-btn" id="addTopupBtn">+ Добавить взнос</button>
     </div>
     <div class="tablewrap"><table id="listTopup"></table></div>
@@ -208,13 +222,13 @@ h3,th,.kpi .hint,.balance-total span,.carry span,.mon ul,#avgMonths,#budgetSumma
   </div>
   <div class="card">
     <h2>Общая база (синхронизация)</h2>
-    <p class="hint" style="margin:0">Данные сами обновляются на всех устройствах: телефон Кати О. увидит ваши правки и наоборот. Введите общий пароль — одинаковый у вас обеих.</p>
+    <p class="hint" style="margin:0">Данные сами обновляются на всех устройствах: второе устройство увидит ваши правки и наоборот. Введите общий пароль — одинаковый у вас обеих.</p>
     <div class="row"><label class="f">Пароль общей базы <input id="syncKey" type="text" autocomplete="off" placeholder="общий пароль"></label><button class="btn small" id="syncConnect">Подключить</button></div>
     <div class="status" id="syncStatus"></div>
   </div>
   <div class="card">
     <h2>Резервная копия и обмен</h2>
-    <p class="hint" style="margin:0">Данные хранятся только в этом браузере. Чтобы перенести их на другое устройство или отдать Кате, сохраните файл и загрузите его там.</p>
+    <p class="hint" style="margin:0">Данные хранятся только в этом браузере. Чтобы перенести их на другое устройство или перенести на другое устройство, сохраните файл и загрузите его там.</p>
     <div class="row"><button class="btn" id="exportBtn">Сохранить данные в файл</button><button class="btn ghost" id="importBtn">Загрузить из файла</button><input type="file" id="importIn" accept=".json,application/json,text/plain" hidden></div>
     <details><summary class="hint" style="cursor:pointer">Файл не выбирается (телефон, мессенджер)? Вставьте его содержимое текстом</summary>
       <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
@@ -1058,7 +1072,7 @@ $('#shareBtn').onclick=async()=>{
   const file=new File([html],name,{type:'text/html'});
   try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Касса: '+monthLabel(m)});st.textContent='Отчёт отправлен.';return}}catch(e){if(e.name==='AbortError')return}
   const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.append(a);a.click();a.remove();
-  st.textContent=`Отчёт «${name}» сохранён в «Загрузки». Отправьте его Кате в Telegram: на телефоне он откроется в браузере.`;
+  st.textContent=`Отчёт «${name}» сохранён в «Загрузки». Отправьте его второму участнику в Telegram: на телефоне он откроется в браузере.`;
 };
 
 function applyReadOnly(){
