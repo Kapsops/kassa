@@ -180,7 +180,7 @@ button.x.rep.on{color:var(--ok)}
 <div class="wrap">
 <header>
   <h1>Семейная касса<small id="hdrsub">Общие траты Кати П. и Кати О.</small></h1>
-  <div class="row" style="gap:8px"><button class="btn small" id="fsResume" hidden>Включить автосохранение</button><span class="pill" id="fsPill" hidden></span></div>
+  <div class="row" style="gap:8px"><button class="btn small" id="fsResume" hidden>Включить автосохранение</button><span class="pill" id="fsPill" hidden></span><span class="pill in" id="syncPill" hidden></span></div>
   <nav role="tablist" id="tabs">
     <button data-tab="month" aria-selected="true">Месяц</button>
     <button data-tab="add">Добавить</button>
@@ -312,6 +312,12 @@ button.x.rep.on{color:var(--ok)}
     <div class="status" id="fsStatus"></div>
   </div>
   <div class="card">
+    <h2>Общая база (синхронизация)</h2>
+    <p class="hint" style="margin:0">Данные сами обновляются на всех устройствах: телефон Кати О. увидит ваши правки и наоборот. Введите общий пароль — одинаковый у вас обеих.</p>
+    <div class="row"><label class="f">Пароль общей базы <input id="syncKey" type="text" autocomplete="off" placeholder="общий пароль"></label><button class="btn small" id="syncConnect">Подключить</button></div>
+    <div class="status" id="syncStatus"></div>
+  </div>
+  <div class="card">
     <h2>Резервная копия и обмен</h2>
     <p class="hint" style="margin:0">Данные хранятся только в этом браузере. Чтобы перенести их на другое устройство или отдать Кате, сохраните файл и загрузите его там.</p>
     <div class="row"><button class="btn" id="exportBtn">Сохранить данные в файл</button><button class="btn ghost" id="importBtn">Загрузить из файла</button><input type="file" id="importIn" accept=".json,application/json,text/plain" hidden></div>
@@ -385,10 +391,11 @@ function load(){
   b.tx = SEED.slice();
   return b;
 }
-function save(){if(SNAPSHOT)return;try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}if(typeof fsSchedule==='function')fsSchedule()}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}if(typeof fsSchedule==='function')fsSchedule()}
+function save(){if(SNAPSHOT)return;saveLocal();if(typeof syncSchedule==='function')syncSchedule()}
 // чистим пустые черновики от случайных нажатий «+»
 state.tx=state.tx.filter(t=>!(!t.amount&&(t.desc==='Новая покупка'||t.desc==='Новая операция'||t.desc==='Пополнение')));
-save();
+saveLocal();
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1070,6 +1077,43 @@ $('#fsResume').onclick=async()=>{if(!fsHandle)return;try{if((await fsHandle.requ
 (async()=>{if(SNAPSHOT)return;if(!fsOK){fsShow();return}fsHandle=await idbGet();
   if(fsHandle){try{if((await fsHandle.queryPermission({mode:'readwrite'}))==='granted'){await fsConnect(fsHandle,true);return}}catch(e){}}
   fsShow()})();
+
+/* ---------- ОБЩАЯ БАЗА (синхронизация через сервер) ---------- */
+const SYNC_URL='https://functions.yandexcloud.net/d4evu12auvae29mjc5gc';
+let syncKey=localStorage.getItem('kassa-sync-key')||'', syncTimer=null;
+function syncStatus(t){const el=$('#syncStatus');if(el)el.textContent=t;const p=$('#syncPill');if(p){p.hidden=!t;p.textContent=t}}
+async function syncPull(silent){
+  if(!syncKey||SNAPSHOT)return;
+  try{
+    const r=await fetch(SYNC_URL,{headers:{'x-kassa-key':syncKey}});
+    if(r.status===403){syncStatus('Общая база: неверный пароль');return}
+    const s=await r.json();
+    if(s&&Array.isArray(s.tx)&&(s._updatedAt||0)>(state._updatedAt||0)){
+      state=Object.assign(blank(),s,{settings:Object.assign({},blank().settings,s.settings||{})});
+      saveLocal();renderAll();
+      syncStatus('Общая база: подтянуты свежие данные');
+    } else if(!silent) syncStatus('Общая база: данные актуальны');
+  }catch(e){if(!silent)syncStatus('Общая база: нет связи, работаем локально')}
+}
+function syncPush(){
+  if(!syncKey||SNAPSHOT)return;
+  state._updatedAt=Date.now();saveLocal();
+  fetch(SYNC_URL,{method:'POST',headers:{'Content-Type':'application/json','x-kassa-key':syncKey},body:JSON.stringify(state)})
+    .then(r=>syncStatus(r.ok?'Общая база: сохранено в '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):'Общая база: ошибка сохранения'))
+    .catch(()=>syncStatus('Общая база: нет связи, изменения пока только у вас'));
+}
+function syncSchedule(){clearTimeout(syncTimer);syncTimer=setTimeout(syncPush,1200)}
+if($('#syncConnect')){
+  $('#syncKey').value=syncKey;
+  $('#syncConnect').onclick=()=>{
+    syncKey=$('#syncKey').value.trim();
+    localStorage.setItem('kassa-sync-key',syncKey);
+    if(syncKey){syncStatus('Общая база: подключаюсь…');syncPull()}else syncStatus('');
+  };
+}
+syncPull(true);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncPull(true)});
+setInterval(()=>syncPull(true),60000);
 
 /* ---------- ОТЧЁТ ДЛЯ ВТОРОЙ КАТИ ---------- */
 // копия всего интерфейса с вшитыми данными: открывается где угодно, править в ней нельзя
