@@ -395,6 +395,7 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const rub=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{maximumFractionDigits:2})+'\u00a0₽';
 const rub0=n=>Math.round(n).toLocaleString('ru-RU')+'\u00a0₽';
 const uid=()=>Math.random().toString(36).slice(2,10);
+const plural=(n,a,b,c)=>{const m=n%100,d=n%10;return m>=11&&m<=14?c:d===1?a:d>=2&&d<=4?b:c};
 const monthLabel=m=>{const [y,mm]=m.split('-');return MONTHS_NOM[+mm-1]+' '+y};
 const curMonth=()=>new Date().toISOString().slice(0,7);
 
@@ -898,7 +899,7 @@ function updateListSummaries(){
       const ownB = expRows.filter(t => t.paidBy === B).reduce((acc, t) => acc + (Number(t.amount)||0), 0);
       const effA = sumA + ownA, effB = sumB + ownB;
       const fmt = (v, own) => own > 0 ? `${rub(v)} + со своих ${rub(own)} = <b>${rub(v + own)}</b>` : `<b>${rub(v)}</b>`;
-      let tpl = `Всего внесено в этом месяце: <b>${rub(sum + ownA + ownB)}</b> (${esc(A)}: ${fmt(sumA, ownA)} | ${esc(B)}: ${fmt(sumB, ownB)}). `;
+      let tpl = `Всего внесено в этом месяце: <b>${rub(sum + ownA + ownB)}</b> · ${topRows.length} ${plural(topRows.length,'пополнение','пополнения','пополнений')} (${esc(A)}: ${fmt(sumA, ownA)} | ${esc(B)}: ${fmt(sumB, ownB)}). `;
       if(Math.abs(effA - effB) > 1){
         const low = effA < effB ? A : B;
         tpl += `<span style="color:var(--warn)">${esc(low)} осталось донести <b style="font-size:19px">${rub(Math.abs(effA - effB)/2)}</b></span> с учётом оплат со своих.`;
@@ -917,7 +918,7 @@ function updateListSummaries(){
       const [A,B] = people();
       const ownA = expRows.filter(t => t.paidBy === A).reduce((acc, t) => acc + (Number(t.amount)||0), 0);
       const ownB = expRows.filter(t => t.paidBy === B).reduce((acc, t) => acc + (Number(t.amount)||0), 0);
-      let tpl = `Всего расходов за месяц: <b>${rub(sum)}</b> (${expRows.length} оп.)`;
+      let tpl = `Всего расходов за месяц: <b>${rub(sum)}</b> · ${expRows.length} ${plural(expRows.length,'покупка','покупки','покупок')}`;
       if(ownA > 0 || ownB > 0){
         tpl += ` · Из них оплачено со своих карт: ${esc(A)} — ${rub(ownA)}, ${esc(B)} — ${rub(ownB)} (учтено в Глобальном балансе).`;
       }
