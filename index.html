@@ -314,7 +314,12 @@ button.x.rep.on{color:var(--ok)}
   <div class="card">
     <h2>Резервная копия и обмен</h2>
     <p class="hint" style="margin:0">Данные хранятся только в этом браузере. Чтобы перенести их на другое устройство или отдать Кате, сохраните файл и загрузите его там.</p>
-    <div class="row"><button class="btn" id="exportBtn">Сохранить данные в файл</button><button class="btn ghost" id="importBtn">Загрузить из файла</button><input type="file" id="importIn" accept=".json" hidden></div>
+    <div class="row"><button class="btn" id="exportBtn">Сохранить данные в файл</button><button class="btn ghost" id="importBtn">Загрузить из файла</button><input type="file" id="importIn" accept=".json,application/json,text/plain" hidden></div>
+    <details><summary class="hint" style="cursor:pointer">Файл не выбирается (телефон, мессенджер)? Вставьте его содержимое текстом</summary>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <textarea id="importText" placeholder="Откройте JSON-файл в любом блокноте, выделите всё, скопируйте и вставьте сюда"></textarea>
+        <div><button class="btn small" id="importTextBtn">Импортировать текст</button></div>
+      </div></details>
     <div class="status" id="ioStatus"></div>
   </div>
 </section>
@@ -1030,10 +1035,19 @@ $('#saveSettings').onclick=()=>{const s=state.settings,oldA=s.nameA,oldB=s.nameB
   save();renderAll();$('#ioStatus').textContent='Настройки сохранены.'};
 $('#exportBtn').onclick=()=>{const b=new Blob([JSON.stringify(state,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='семейная-касса-'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();$('#ioStatus').textContent='Файл сохранён в «Загрузки».'};
 $('#importBtn').onclick=()=>$('#importIn').click();
-$('#importIn').onchange=async()=>{const f=$('#importIn').files[0];if(!f)return;try{const s=JSON.parse(await f.text());if(!Array.isArray(s.tx))throw new Error('не тот файл');
+function importStateObj(s){
+  if(!s||!Array.isArray(s.tx))throw new Error('это не файл кассы');
   const have=new Set(state.tx.map(t=>t.id));let n=0;s.tx.forEach(t=>{if(!have.has(t.id)){state.tx.push(t);n++}});
   const ha=new Set(state.annual.map(p=>p.id));(s.annual||[]).forEach(p=>{if(!ha.has(p.id))state.annual.push(p)});
-  save();renderAll();$('#ioStatus').textContent=`Добавлено новых операций: ${n}. Совпадающие пропущены.`}catch(e){$('#ioStatus').textContent='Не удалось прочитать файл: '+e.message}$('#importIn').value=''};
+  save();renderAll();return n;
+}
+$('#importIn').onchange=async()=>{const f=$('#importIn').files[0];if(!f)return;
+  try{const n=importStateObj(JSON.parse(await f.text()));$('#ioStatus').textContent=`Добавлено новых операций: ${n}. Совпадающие пропущены.`}
+  catch(e){$('#ioStatus').textContent='Не удалось прочитать файл: '+e.message}
+  $('#importIn').value=''};
+$('#importTextBtn').onclick=()=>{
+  try{const n=importStateObj(JSON.parse($('#importText').value));$('#ioStatus').textContent=`Добавлено новых операций: ${n}. Совпадающие пропущены.`;$('#importText').value=''}
+  catch(e){$('#ioStatus').textContent='Не удалось прочитать текст: '+e.message}};
 
 /* ---------- АВТОСОХРАНЕНИЕ В ФАЙЛ ---------- */
 const fsOK='showSaveFilePicker' in window;
