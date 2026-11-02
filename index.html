@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Семейная касса</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Unbounded:wght@300;400;500&display=swap">
 <style>
 /* Графитовые матовые панели, коралловый акцент, компактная финансовая типографика. */
 :root{
@@ -14,7 +14,7 @@
   --ink:oklch(from var(--ink-raw) l c h);--muted:oklch(from var(--ink-raw) .68 l c h);--line:oklch(from var(--ink-raw) .14 l c h);
   --accent:oklch(from var(--coral-raw) l c h);--on-accent:#241A18;--accent-soft:oklch(from var(--coral-raw) .14 l c h);
   --a:#FF795F;--b:#C9ADA6;--warn:#FF9B83;--ok:#B8D9BE;--bad:#FF9B83;
-  --font-display:"Unbounded","Golos Text",sans-serif;--font-body:"Golos Text",sans-serif;color-scheme:dark;
+  --font-display:"Unbounded","Golos Text",sans-serif;--font-body:"Golos Text",sans-serif;--font-mono:"IBM Plex Mono",monospace;color-scheme:dark;
 }
 *{box-sizing:border-box}[hidden]{display:none!important}option{background:var(--surface-solid);color:var(--ink)}::selection{background:var(--accent);color:var(--on-accent)}img{max-width:100%}
 html{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);background:var(--bg)}
@@ -43,6 +43,10 @@ svg text{fill:var(--muted);font:11px var(--font-body)}#daily{margin-top:4px}.cal
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--panel-raised);border:1px solid var(--line);color:var(--ink);padding:10px 14px;border-radius:12px;display:none;gap:12px;align-items:center;z-index:50;font-size:14px;max-width:90vw}#toast.show{display:flex}#toast button{border:0;background:none;color:var(--accent);font:600 14px var(--font-body);cursor:pointer;min-height:44px;white-space:nowrap}#topupSummary b,#expenseSummary b{font-size:16px}
 @media(max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}.cal{grid-template-columns:repeat(3,minmax(0,1fr))}header{grid-template-columns:1fr}nav{justify-content:flex-start}}
 @media(max-width:560px){body{font-size:15px}.wrap{padding:16px 12px 48px;gap:16px}.card,.settle{padding:16px;border-radius:14px}.kpis{gap:8px}.kpi{padding:14px}.kpi b{font-size:18px}.cal{grid-template-columns:repeat(2,minmax(0,1fr))}.carry{grid-template-columns:1fr;gap:12px}.settle-main{align-items:flex-start}.donut{width:88px;height:88px;flex-basis:88px}.bar{grid-template-columns:96px 1fr 104px;gap:8px}nav{display:grid;grid-template-columns:repeat(3,1fr);width:100%}nav button{padding:8px 4px}.balance-total b{font-size:19px}.settle{flex-direction:column}.balance-total{text-align:left}.reminders>div{flex-direction:column;gap:0}.tablewrap{max-height:none}td input,td select{min-height:44px}}
+h3,th,.kpi .hint,.balance-total span,.carry span,.mon ul,#avgMonths,#budgetSummary,.status{font-family:var(--font-mono);letter-spacing:.07em}h3,th{font-size:10px}.kpi .hint,.balance-total span,.carry span,.mon ul,#budgetSummary,.status{font-size:11px;text-transform:uppercase}td.num{font-family:var(--font-mono);font-size:12px}
+#avgTable td{padding-top:3px;padding-bottom:3px;height:32px}#avgTable th{padding-top:6px;padding-bottom:6px}#avgTable input{min-height:30px;height:30px;padding-top:2px;padding-bottom:2px;font-family:var(--font-mono);font-size:12px}#avgTable td:first-child{font-size:13px}#p-plan>.card:has(#avgTable){gap:10px}#p-plan>.card:has(#avgTable) .hint{font-size:12px}
+#sAmt{font-family:var(--font-mono)}.sub-comment{display:block;color:var(--muted);font-size:12px;margin-top:2px}.mon li[title]{cursor:help}
+@media(max-width:560px){#avgTable input{height:44px;min-height:44px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -148,10 +152,11 @@ svg text{fill:var(--muted);font:11px var(--font-body)}#daily{margin-top:4px}.cal
     <div class="tablewrap"><table id="subTable"></table></div>
     <div class="quick-form">
       <label class="f">Название <input id="sName" placeholder="Например, Кинопоиск"></label>
-      <label class="f">Сумма, ₽ <input id="sAmt" type="number" min="0" step="0.01" inputmode="decimal" placeholder="299"></label>
+      <label class="f">Сумма, ₽ <input id="sAmt" type="text" inputmode="decimal" autocomplete="off" placeholder="299" onfocus="this.select()"></label>
       <label class="f">Периодичность <select id="sFreq"><option value="monthly">Каждый месяц</option><option value="yearly">Раз в год</option></select></label>
       <label class="f">Следующее списание <input id="sDate" type="date"></label>
       <label class="f">Источник оплаты <select id="sSource"></select></label>
+      <label class="f" style="flex:1 1 220px">Комментарий <input id="sComment" placeholder="Например, отключить в декабре"></label>
       <button class="btn" id="sAdd">Добавить</button>
     </div>
     <div class="status" id="subStatus"></div>
@@ -920,18 +925,20 @@ function daysTo(date){const now=new Date();now.setHours(12,0,0,0);return Math.ce
 function renderSubscriptions(){
   const subs=state.subscriptions.slice().sort((a,b)=>(a.nextDate||'9999').localeCompare(b.nextDate||'9999'));
   $('#sSource').innerHTML=`<option value="Общие деньги">Общие деньги</option>`+people().map(p=>`<option value="${esc(p)}">Со своих: ${esc(p)}</option>`).join('');
-  $('#subTable').innerHTML=subs.length?`<tr><th>Подписка</th><th class="num">Сумма</th><th>Периодичность</th><th>Следующее списание</th><th>Оплата</th><th></th></tr>`+subs.map(s=>`<tr><td>${esc(s.name)}</td><td class="num">${rub(s.amount)}</td><td>${s.freq==='yearly'?'Раз в год':'Каждый месяц'}</td><td>${s.nextDate?new Date(s.nextDate+'T12:00:00').toLocaleDateString('ru-RU'):'—'}</td><td>${esc(s.source||'Общие деньги')}</td><td><button class="x" data-sdel="${s.id}" aria-label="Удалить ${esc(s.name)}">×</button></td></tr>`).join(''):'<tr><td class="empty">Добавьте первую подписку — она не будет создавать расходы автоматически.</td></tr>';
+  $('#subTable').innerHTML=subs.length?`<tr><th>Подписка / комментарий</th><th class="num">Сумма</th><th>Периодичность</th><th>Следующее списание</th><th>Оплата</th><th></th></tr>`+subs.map(s=>`<tr><td>${esc(s.name)}${s.comment?`<span class="sub-comment">${esc(s.comment)}</span>`:''}</td><td class="num">${rub(s.amount)}</td><td>${s.freq==='yearly'?'Раз в год':'Каждый месяц'}</td><td>${s.nextDate?new Date(s.nextDate+'T12:00:00').toLocaleDateString('ru-RU'):'—'}</td><td>${esc(s.source||'Общие деньги')}</td><td><button class="x" data-sdel="${s.id}" aria-label="Удалить ${esc(s.name)}">×</button></td></tr>`).join(''):'<tr><td class="empty">Добавьте первую подписку — она не будет создавать расходы автоматически.</td></tr>';
   const due=subs.filter(s=>s.nextDate&&daysTo(s.nextDate)>=0&&daysTo(s.nextDate)<=2);
-  $('#subReminders').innerHTML=due.length?`<div class="reminders"><h3>Ближайшие списания</h3>${due.map(s=>`<div><b>${esc(s.name)}</b><span>${rub(s.amount)} · ${daysTo(s.nextDate)===0?'сегодня':daysTo(s.nextDate)===1?'завтра':'через 2 дня'}</span></div>`).join('')}</div>`:'';
+  $('#subReminders').innerHTML=due.length?`<div class="reminders"><h3>Ближайшие списания</h3>${due.map(s=>`<div><b>${esc(s.name)}</b>${s.comment?`<span class="sub-comment">${esc(s.comment)}</span>`:''}<span>${rub(s.amount)} · ${daysTo(s.nextDate)===0?'сегодня':daysTo(s.nextDate)===1?'завтра':'через 2 дня'}</span></div>`).join('')}</div>`:'';
   return {subs,monthly:subs.reduce((sum,s)=>sum+subMonthly(s),0),due};
 }
-$('#sAdd').onclick=()=>{const name=$('#sName').value.trim(),amount=parseFloat($('#sAmt').value),nextDate=$('#sDate').value;if(!name||!(amount>0)||!nextDate){$('#subStatus').textContent='Заполните название, сумму и дату следующего списания.';return}state.subscriptions.push({id:uid(),name,amount,freq:$('#sFreq').value,nextDate,source:$('#sSource').value});save();$('#sName').value='';$('#sAmt').value='';$('#sDate').value='';$('#subStatus').textContent='Подписка добавлена.';renderPlan()};
+$('#sAdd').onclick=()=>{const name=$('#sName').value.trim(),amount=parseFloat($('#sAmt').value.replace(/\s/g,'').replace(',','.')),nextDate=$('#sDate').value;if(!name||!(amount>0)||!nextDate){$('#subStatus').textContent='Заполните название, сумму и дату следующего списания.';return}state.subscriptions.push({id:uid(),name,amount,freq:$('#sFreq').value,nextDate,source:$('#sSource').value,comment:$('#sComment').value.trim()});save();$('#sName').value='';$('#sAmt').value='';$('#sDate').value='';$('#sComment').value='';$('#subStatus').textContent='Подписка добавлена.';renderPlan()};
 $('#subTable').addEventListener('click',e=>{const b=e.target.closest('[data-sdel]');if(!b)return;const gone=state.subscriptions.find(s=>s.id===b.dataset.sdel);state.subscriptions=state.subscriptions.filter(s=>s.id!==b.dataset.sdel);save();renderPlan();toast('Подписка удалена',()=>{state.subscriptions.push(gone);save();renderPlan()})});
 function renderPlan(){
   renderAverages();const subInfo=renderSubscriptions(),a=state.annual,byM=Array(12).fill(0);a.forEach(p=>byM[p.month-1]+=Number(p.amount)||0);
+  const calItems=Array.from({length:12},()=>[]);a.forEach(p=>calItems[p.month-1].push(p));
+  subInfo.subs.forEach(s=>{if(s.freq==='monthly'){for(let i=0;i<12;i++){byM[i]+=Number(s.amount)||0;calItems[i].push(s)}}else{const i=Math.max(0,(+String(s.nextDate||'').slice(5,7)||1)-1);byM[i]+=Number(s.amount)||0;calItems[i].push(s)}});
   const total=byM.reduce((s,v)=>s+v,0),max=Math.max(...byM,1),now=new Date().getMonth(),next=[...Array(12)].map((_,k)=>(now+k)%12).find(k=>byM[k]>0);
   $('#planKpis').innerHTML=[['Подписки в месяц',rub0(subInfo.monthly),subInfo.subs.length+' '+plural(subInfo.subs.length,'подписка','подписки','подписок')],['Ежегодные платежи',rub0(total),'откладывать '+rub0(total/12)+' в месяц'],['Ближайший годовой',next!=null?MONTHS_NOM[next]:'—',next!=null?rub0(byM[next]):'добавьте платежи ниже']].map(([k,v,s])=>`<div class="kpi"><h3>${k}</h3><b>${v}</b><span class="hint">${s}</span></div>`).join('');
-  $('#cal').innerHTML=MONTHS_NOM.map((m,i)=>`<div class="mon${i===now?' now':''}"><span class="mname">${m}</span><span class="msum">${byM[i]?rub0(byM[i]):'<span class="muted">—</span>'}</span><div class="heat"><i style="width:${byM[i]/max*100}%"></i></div><ul>${a.filter(p=>p.month===i+1).map(p=>`<li>${esc(p.name)}</li>`).join('')}</ul></div>`).join('');
+  $('#cal').innerHTML=MONTHS_NOM.map((m,i)=>`<div class="mon${i===now?' now':''}"><span class="mname">${m}</span><span class="msum">${byM[i]?rub0(byM[i]):'<span class="muted">—</span>'}</span><div class="heat"><i style="width:${byM[i]/max*100}%"></i></div><ul>${calItems[i].map(p=>`<li${p.comment?` title="${esc(p.comment)}"`:''}>${esc(p.name)}${p.freq==='monthly'?' · каждый месяц':''}</li>`).join('')}</ul></div>`).join('');
   $('#planTable').innerHTML=a.length?`<tr><th>Платёж</th><th>Месяц</th><th class="num">Сумма</th><th></th></tr>`+a.slice().sort((x,y)=>x.month-y.month).map(p=>`<tr><td>${esc(p.name)}</td><td>${MONTHS_NOM[p.month-1]}</td><td class="num">${rub0(p.amount)}</td><td><button class="x" data-pdel="${p.id}" aria-label="Удалить">×</button></td></tr>`).join(''):'<tr><td class="empty">Пока пусто. Добавьте страховку, налоги, техосмотр…</td></tr>';
 }
 $('#planTable').addEventListener('click',e=>{const b=e.target.closest('[data-pdel]');if(!b)return;state.annual=state.annual.filter(p=>p.id!==b.dataset.pdel);save();renderPlan()});
@@ -1056,7 +1063,7 @@ $('#shareBtn').onclick=async()=>{
 
 function applyReadOnly(){
   if(!SNAPSHOT)return;
-  document.querySelectorAll('[data-tab=add],[data-tab=settings],#shareBtn,#fsResume,#fsPill,#pName,#pMonth,#pAmt,#pAdd,#sName,#sAmt,#sFreq,#sDate,#sSource,#sAdd,#addTopupBtn,#addExpBtn,#addManualFromAddTab,[data-del],[data-pdel]').forEach(e=>e.hidden=true);
+  document.querySelectorAll('[data-tab=add],[data-tab=settings],#shareBtn,#fsResume,#fsPill,#pName,#pMonth,#pAmt,#pAdd,#sName,#sAmt,#sFreq,#sDate,#sSource,#sComment,#sAdd,#addTopupBtn,#addExpBtn,#addManualFromAddTab,[data-del],[data-pdel]').forEach(e=>e.hidden=true);
   document.querySelectorAll('#listTopup input, #listExpense input, #listOther input, #listTopup select, #listExpense select, #listOther select, #avgTable input').forEach(e=>e.disabled=true);
   $('#hdrsub').textContent=`Отчёт от ${new Date(SNAPSHOT._at).toLocaleDateString('ru-RU')} · только просмотр · ${people().join(' и ')}`;
 }
