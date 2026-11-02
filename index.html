@@ -252,7 +252,7 @@ button.x.rep.on{color:var(--ok)}
   <div class="card">
     <div class="row" style="justify-content:space-between">
       <h2 style="color:var(--accent)">Расходы</h2>
-      <span style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="plus-btn" id="copyRepeatBtn" title="Скопировать в этот месяц расходы, помеченные ↻, из прошлого месяца">↻ Перенести регулярные</button><button type="button" class="plus-btn" id="addExpBtn">+ Добавить расход</button></span>
+      <button type="button" class="plus-btn" id="addExpBtn">+ Добавить расход</button>
     </div>
     <div class="tablewrap"><table id="listExpense"></table></div>
     <div class="status" id="expenseSummary" style="margin-top:0"></div>
@@ -841,23 +841,6 @@ function addManualTx(ty){
 }
 
 $('#addTopupBtn').onclick = () => addManualTx('topup');
-$('#copyRepeatBtn').onclick = () => {
-  fillMonthSel($('#lSel'));
-  const m = $('#lSel').value || curMonth();
-  const [y,mm] = m.split('-').map(Number);
-  const prev = mm===1 ? (y-1)+'-12' : y+'-'+String(mm-1).padStart(2,'0');
-  const days = new Date(y,mm,0).getDate();
-  const have = new Set(state.tx.filter(t=>t.month===m&&t.type==='expense').map(t=>t.desc+'|'+t.amount));
-  let n=0;
-  state.tx.filter(t=>t.month===prev&&t.type==='expense'&&t.repeat).forEach(t=>{
-    if(have.has(t.desc+'|'+t.amount))return;
-    const day=String(Math.min(+t.date.slice(8,10)||1,days)).padStart(2,'0');
-    state.tx.push({...t,id:uid(),date:m+'-'+day,month:m});
-    n++;
-  });
-  save();renderAll();
-  toast(n?'Перенесено регулярных расходов: '+n+' из '+monthLabel(prev).toLowerCase():'Нечего переносить: отметьте ↻ регулярные расходы в прошлом месяце');
-};
 $('#addExpBtn').onclick = () => addManualTx('expense');
 if($('#addManualFromAddTab')){
   $('#addManualFromAddTab').onclick = () => {
